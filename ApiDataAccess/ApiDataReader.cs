@@ -1,7 +1,4 @@
-public interface IApiDataReader
-{
-    Task<string> Read(string baseAddress, string requestUri);
-}
+namespace StarWarsPlanetsStats.ApiDataAccess;
 
 public class ApiDataReader : IApiDataReader
 {
