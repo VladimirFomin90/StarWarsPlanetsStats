@@ -4,7 +4,7 @@ using StarWarsPlanetsStats.DTO;
 
 try
 {
-    await new StarWarsPlanetsStatsApp().Run();
+    await new StarWarsPlanetsStatsApp(new ApiDataReader()).Run();
 }
 catch (Exception e)
 {
@@ -16,15 +16,21 @@ Console.ReadKey();
 
 public class StarWarsPlanetsStatsApp
 {
+    public readonly IApiDataReader _apiDataReader;
+
+    public StarWarsPlanetsStatsApp(IApiDataReader apiDataReader)
+    {
+        _apiDataReader = apiDataReader;
+    }
+
     public async Task Run()
     {
-        string json = null;
+        string? json = null;
 
         try
         {
-            IApiDataReader apiDataReader = new ApiDataReader();
-// var json = await apiDataReader.Read("https://swapi.dev/", "api/planets");
-            var json = await apiDataReader.Read("https://swapi.dev/", "api/planets");
+            // var json = await apiDataReader.Read("https://swapi.dev/", "api/planets");
+            json = await _apiDataReader.Read("https://swapi.dev/", "api/planets");
         }
         catch (HttpRequestException e)
         {
@@ -33,6 +39,42 @@ public class StarWarsPlanetsStatsApp
         }
 
         var root = JsonSerializer.Deserialize<Root>(json);
+        var planets = ToPlanets(root);
+    }
+
+    private IEnumerable<Planet> ToPlanets(Root? root)
+    {
+        if (root is null)
+        {
+            throw new ArgumentException(nameof(root));
+        }
+
+        throw new NotImplementedException();
+    }
+}
+
+public readonly record struct Planet
+{
+    public string Name { get; }
+    public int Diameter { get; }
+    public int? SurfaceWater { get; }
+    public int? Population { get; }
+
+    public Planet(
+        string name,
+        int diameter,
+        int? surfacewater,
+        int? population
+    )
+    {
+        if (name is null)
+        {
+            throw new ArgumentException(nameof(name));
+        }
+        Name = name;
+        Diameter = diameter;
+        SurfaceWater = surfacewater;
+        Population = population;
     }
 }
 
