@@ -40,6 +40,11 @@ public class StarWarsPlanetsStatsApp
 
         var root = JsonSerializer.Deserialize<Root>(json);
         var planets = ToPlanets(root);
+
+        foreach (var planet in planets)
+        {
+            Console.WriteLine(planet);
+        }
     }
 
     private IEnumerable<Planet> ToPlanets(Root? root)
@@ -49,7 +54,14 @@ public class StarWarsPlanetsStatsApp
             throw new ArgumentException(nameof(root));
         }
 
-        throw new NotImplementedException();
+        var planets = new List<Planet>();
+
+        foreach (var planetDto in root.results)
+        {
+            Planet planet = (Planet)planetDto;
+            planets.Add(planet);
+        }
+        return planets;
     }
 }
 
@@ -76,6 +88,30 @@ public readonly record struct Planet
         SurfaceWater = surfacewater;
         Population = population;
     }
+
+    public static explicit operator Planet(Result planetDto)
+    {
+        var name = planetDto.name;
+        var diameter = int.Parse(planetDto.diameter);
+
+        int? population = planetDto.population.ToIntOrNull();
+
+        int? surfaceWater = planetDto.surface_water.ToIntOrNull();
+
+        return new Planet(name, diameter, population, surfaceWater);
+    }
 }
 
-// Root myDeserializedClass = JsonSerializer.Deserialize<Root>(myJsonResponse);
+public static class StringExtension
+{
+    public static int? ToIntOrNull(this string? input)
+    {
+        int? result = null;
+        if (int.TryParse(input, out int resultParsed))
+        {
+            result = resultParsed;
+        }
+
+        return result;
+    }
+}
