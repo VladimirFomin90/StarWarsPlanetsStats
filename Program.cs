@@ -45,6 +45,50 @@ public class StarWarsPlanetsStatsApp
         {
             Console.WriteLine(planet);
         }
+
+        Console.WriteLine();
+        Console.WriteLine("Print raiting of planets");
+        Console.WriteLine("population");
+        Console.WriteLine("diameter");
+        Console.WriteLine("surface water");
+        Console.WriteLine();
+
+        var userChoice = Console.ReadLine();
+
+        if (userChoice == "population")
+        {
+            var planetMaxPopulation = planets.MaxBy(planet => planet.Population);
+            Console.WriteLine($"Max population : " + $"{planetMaxPopulation.Population} " +
+                $"Planet : " + $"{ planetMaxPopulation.Name}");
+
+            var planetMinPopulation = planets.MinBy(planet => planet.Population);
+            Console.WriteLine($"Min population : " + $"{planetMinPopulation.Population} " +
+                $"Planet : " + $"{planetMinPopulation.Name}");
+        }
+        else if (userChoice == "diameter")
+        {
+            var planetMaxDiameter = planets.MaxBy(planet => planet.Diameter);
+            Console.WriteLine($"Max diameter : " + $"{planetMaxDiameter.Diameter} " +
+                $"Planet : " + $"{planetMaxDiameter.Name}");
+
+            var planetMinDiameter = planets.MinBy(planet => planet.Diameter);
+            Console.WriteLine($"Min diameter : " + $"{planetMinDiameter.Diameter} " +
+                $"Planet : " + $"{planetMinDiameter.Name}");
+        }
+        else if (userChoice == "surface water")
+        {
+            var planetMaxSurfaceWater = planets.MaxBy(planet => planet.SurfaceWater);
+            Console.WriteLine($"Max surface water : " + $"{planetMaxSurfaceWater.SurfaceWater} " +
+                $"Planet : " + $"{planetMaxSurfaceWater.Name}");
+
+            var planetMinSurfaceWater = planets.MinBy(planet => planet.SurfaceWater);
+            Console.WriteLine($"Min surface water : " + $"{planetMinSurfaceWater.SurfaceWater} " +
+                $"Planet : " + $"{planetMinSurfaceWater.Name}");
+        }
+        else
+        {
+            Console.WriteLine("Invalid choice");
+        }
     }
 
     private IEnumerable<Planet> ToPlanets(Root? root)
