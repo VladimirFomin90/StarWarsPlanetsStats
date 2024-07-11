@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
-using StarWarsPlanetsStats.ApiDataAccess;
+﻿using StarWarsPlanetsStats.ApiDataAccess;
 using StarWarsPlanetsStats.DTO;
+using System.Text.Json;
 
 try
 {
@@ -29,8 +29,7 @@ public class StarWarsPlanetsStatsApp
 
         try
         {
-            // var json = await apiDataReader.Read("https://swapi.dev/", "api/planets");
-            json = await _apiDataReader.Read("https://swapi.dev/", "api/planets");
+            json ??= await _apiDataReader.Read("https://swapi.dev/", "api/planets");
         }
         catch (HttpRequestException e)
         {
@@ -57,33 +56,18 @@ public class StarWarsPlanetsStatsApp
 
         if (userChoice == "population")
         {
-            var planetMaxPopulation = planets.MaxBy(planet => planet.Population);
-            Console.WriteLine($"Max population : " + $"{planetMaxPopulation.Population} " +
-                $"Planet : " + $"{ planetMaxPopulation.Name}");
+            ShowStatistic(planets, "population", planet => planet.Population);
 
-            var planetMinPopulation = planets.MinBy(planet => planet.Population);
-            Console.WriteLine($"Min population : " + $"{planetMinPopulation.Population} " +
-                $"Planet : " + $"{planetMinPopulation.Name}");
         }
         else if (userChoice == "diameter")
         {
-            var planetMaxDiameter = planets.MaxBy(planet => planet.Diameter);
-            Console.WriteLine($"Max diameter : " + $"{planetMaxDiameter.Diameter} " +
-                $"Planet : " + $"{planetMaxDiameter.Name}");
+            ShowStatistic(planets, "diameter", planet => planet.Diameter);
 
-            var planetMinDiameter = planets.MinBy(planet => planet.Diameter);
-            Console.WriteLine($"Min diameter : " + $"{planetMinDiameter.Diameter} " +
-                $"Planet : " + $"{planetMinDiameter.Name}");
         }
         else if (userChoice == "surface water")
         {
-            var planetMaxSurfaceWater = planets.MaxBy(planet => planet.SurfaceWater);
-            Console.WriteLine($"Max surface water : " + $"{planetMaxSurfaceWater.SurfaceWater} " +
-                $"Planet : " + $"{planetMaxSurfaceWater.Name}");
+            ShowStatistic(planets, "surface water", planet => planet.SurfaceWater);
 
-            var planetMinSurfaceWater = planets.MinBy(planet => planet.SurfaceWater);
-            Console.WriteLine($"Min surface water : " + $"{planetMinSurfaceWater.SurfaceWater} " +
-                $"Planet : " + $"{planetMinSurfaceWater.Name}");
         }
         else
         {
@@ -91,21 +75,25 @@ public class StarWarsPlanetsStatsApp
         }
     }
 
-    private IEnumerable<Planet> ToPlanets(Root? root)
+    private static void ShowStatistic(IEnumerable<Planet> planets, string propertyName, Func<Planet, int?> propertySelector)
+    {
+        var planetMaxProperty = planets.MaxBy(propertySelector);
+        Console.WriteLine($"Max {propertyName} : " + $"{propertySelector(planetMaxProperty)} " +
+            $"Planet : " + $"{planetMaxProperty.Name}");
+
+        var planetMinProperty = planets.MinBy(propertySelector);
+        Console.WriteLine($"Min {propertyName} : " + $"{propertySelector(planetMinProperty)} " +
+            $"Planet : " + $"{planetMinProperty.Name}");
+    }
+
+    private static IEnumerable<Planet> ToPlanets(Root? root)
     {
         if (root is null)
         {
             throw new ArgumentException(nameof(root));
         }
 
-        var planets = new List<Planet>();
-
-        foreach (var planetDto in root.results)
-        {
-            Planet planet = (Planet)planetDto;
-            planets.Add(planet);
-        }
-        return planets;
+        return root.results.Select(planetDto => (Planet)planetDto);
     }
 }
 
@@ -150,12 +138,6 @@ public static class StringExtension
 {
     public static int? ToIntOrNull(this string? input)
     {
-        int? result = null;
-        if (int.TryParse(input, out int resultParsed))
-        {
-            result = resultParsed;
-        }
-
-        return result;
+        return int.TryParse(input, out int resultParsed) ? resultParsed : null;
     }
 }
