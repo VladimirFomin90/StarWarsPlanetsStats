@@ -40,10 +40,7 @@ public class StarWarsPlanetsStatsApp
         var root = JsonSerializer.Deserialize<Root>(json);
         var planets = ToPlanets(root);
 
-        foreach (var planet in planets)
-        {
-            Console.WriteLine(planet);
-        }
+        TablePrinter.Print(planets);
 
         Console.WriteLine();
         Console.WriteLine("Print raiting of planets");
@@ -75,7 +72,7 @@ public class StarWarsPlanetsStatsApp
         }
     }
 
-    private static void ShowStatistic(IEnumerable<Planet> planets, string propertyName, Func<Planet, int?> propertySelector)
+    private static void ShowStatistic(IEnumerable<Planet> planets, string propertyName, Func<Planet, long?> propertySelector)
     {
         var planetMaxProperty = planets.MaxBy(propertySelector);
         Console.WriteLine($"Max {propertyName} : " + $"{propertySelector(planetMaxProperty)} " +
@@ -102,13 +99,13 @@ public readonly record struct Planet
     public string Name { get; }
     public int Diameter { get; }
     public int? SurfaceWater { get; }
-    public int? Population { get; }
+    public long? Population { get; }
 
     public Planet(
         string name,
         int diameter,
         int? surfacewater,
-        int? population
+        long? population
     )
     {
         if (name is null)
@@ -126,11 +123,11 @@ public readonly record struct Planet
         var name = planetDto.name;
         var diameter = int.Parse(planetDto.diameter);
 
-        int? population = planetDto.population.ToIntOrNull();
+        long? population = planetDto.population.ToLongOrNull();
 
         int? surfaceWater = planetDto.surface_water.ToIntOrNull();
 
-        return new Planet(name, diameter, population, surfaceWater);
+        return new Planet(name, diameter, (int?)population, surfaceWater);
     }
 }
 
@@ -139,5 +136,37 @@ public static class StringExtension
     public static int? ToIntOrNull(this string? input)
     {
         return int.TryParse(input, out int resultParsed) ? resultParsed : null;
+    }
+
+    public static long? ToLongOrNull(this string? input)
+    {
+        return long.TryParse(input, out long resultParsed) ? resultParsed : null;
+    }
+}
+
+public static class TablePrinter
+{
+    public static void Print<T>(IEnumerable<T> items)
+    {
+        const int columnWidth = 16;
+        var properties = typeof(T).GetProperties();
+
+        foreach (var property in properties)
+        {
+            Console.Write($"{{0,-{columnWidth}}}|", property.Name);
+        }
+        Console.WriteLine();
+        Console.WriteLine(new string('-', properties.Length * (columnWidth + 1)));
+
+        //Console.WriteLine();
+
+        foreach (var item in items)
+        {
+            foreach (var property in properties)
+            {
+                Console.Write($"{{0,-{columnWidth}}}|", property.GetValue(item));
+            }
+            Console.WriteLine();
+        }
     }
 }
